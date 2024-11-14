@@ -15,78 +15,13 @@ struct ContentView: View {
     @Query var notes: [Note]
     
     @State private var isShowCreateNote: Bool = false
+    @State private var sort = SortDescriptor(\Note.title)
+    
+    @State private var search: String = ""
     
     var body: some View {
         NavigationStack {
-            List {
-                let pinnedNotes = notes.filter({$0.isPinned})
-                if !pinnedNotes.isEmpty {
-                    Section("Pinned Notes"){
-                        ForEach(pinnedNotes) { pinnedNote in
-                            NavigationLink(destination: NoteDetailView(note: pinnedNote)) {
-                                VStack(alignment: .leading) {
-                                    Text(pinnedNote.title)
-                                        .font(.headline)
-                                    Text(pinnedNote.lastUpdated
-                                        .formatted(date: .numeric, time: .shortened))
-                                    .font(.subheadline)
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                    modelContext.delete(pinnedNote)
-                                }
-                            }
-                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                Button {
-                                    pinnedNote.isPinned.toggle()
-                                } label: {
-                                    if pinnedNote.isPinned {
-                                        Image(systemName: "pin.slash.fill")
-                                    }else {
-                                        Image(systemName: "pin.fill")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                
-                let unpinnedNotes = notes.filter({!$0.isPinned})
-                if !unpinnedNotes.isEmpty {
-                    Section("Unpinned Notes"){
-                        ForEach(unpinnedNotes) { unpinnedNote in
-                            NavigationLink(destination: NoteDetailView(note: unpinnedNote)) {
-                                VStack(alignment: .leading) {
-                                    Text(unpinnedNote.title)
-                                        .font(.headline)
-                                    Text(unpinnedNote.lastUpdated
-                                        .formatted(date: .numeric, time: .shortened))
-                                    .font(.subheadline)
-                                }
-                            }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button("Delete", systemImage: "trash.fill", role: .destructive) {
-                                    modelContext.delete(unpinnedNote)
-                                }
-                            }
-                            .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                                Button {
-                                    unpinnedNote.isPinned.toggle()
-                                } label: {
-                                    if unpinnedNote.isPinned {
-                                        Image(systemName: "pin.slash.fill")
-                                    } else {
-                                        Image(systemName: "pin.fill")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                
-            }
+            NoteListView(sort: sort)
             .navigationTitle("Note")
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {
@@ -98,10 +33,21 @@ struct ContentView: View {
                         isShowCreateNote.toggle()
                     }
                 }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Menu("Sort Menu", systemImage: "arrow.up.arrow.down") {
+                        Picker("Sort Picker", selection: $sort) {
+                            Text("Title")
+                                .tag(SortDescriptor(\Note.title))
+                            Text("Last Updated")
+                                .tag(SortDescriptor(\Note.lastUpdated, order: .reverse))
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $isShowCreateNote) {
                 CreateNoteView()
             }
+            .searchable(text: $search)
         }
     }
 }
