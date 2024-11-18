@@ -21,7 +21,7 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            NoteListView(sort: sort)
+            NoteListView(sort: sort, searchKeyworkd: search)
             .navigationTitle("Note")
             .toolbar {
                 ToolbarItemGroup(placement: .bottomBar) {

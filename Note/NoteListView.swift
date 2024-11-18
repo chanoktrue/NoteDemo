@@ -14,8 +14,16 @@ struct NoteListView: View {
     
     @Query var notes: [Note]
     
-    init(sort: SortDescriptor<Note>) {
-        _notes = Query(sort: [sort])
+    init(sort: SortDescriptor<Note>, searchKeyworkd: String  ) {
+        _notes = Query(filter: #Predicate{
+            if searchKeyworkd.isEmpty {
+                return true
+            }else {
+                return $0.title.localizedStandardContains(searchKeyworkd) ||
+                $0.content.localizedStandardContains(searchKeyworkd)
+            }
+            
+        }, sort: [sort])
     }
     
     
@@ -93,5 +101,5 @@ struct NoteListView: View {
 }
 
 #Preview {
-    NoteListView(sort: SortDescriptor(\Note.title))
+    NoteListView(sort: SortDescriptor(\Note.title), searchKeyworkd: "")
 }

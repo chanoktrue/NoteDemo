@@ -16,6 +16,8 @@ struct CreateNoteView: View {
     @State private var isPenned: Bool = false
     @State private var content: String = ""
     
+    @State var isShowingInvalidInputAlert: Bool = false
+    
     var body: some View {
         NavigationStack {
            Form {
@@ -28,7 +30,7 @@ struct CreateNoteView: View {
                        .frame(height: 160)
                }
             }
-           .navigationTitle("Creae Note")
+           .navigationTitle("Create Note")
            .navigationBarTitleDisplayMode(.inline)
            .toolbar {
                ToolbarItemGroup(placement: .topBarLeading) {
@@ -38,13 +40,24 @@ struct CreateNoteView: View {
                }
                ToolbarItemGroup(placement: .topBarTrailing) {
                    Button("Create") {
-                       let note = Note(title: title, isPinned: isPenned, content: content, lastUpdated: Date())
-                       modelContext.insert(note)
-                       dismiss()
+                       
+                       if !title.isEmpty && !content.isEmpty {
+                           let note = Note(title: title, isPinned: isPenned, content: content, lastUpdated: Date())
+                           modelContext.insert(note)
+                           dismiss()
+                       }else{
+                           isShowingInvalidInputAlert.toggle()
+                       }
                    }
                }
            }
-            
+           .alert("Invalid Input", isPresented: $isShowingInvalidInputAlert) {
+               Button("OK") {
+                   
+               }
+           }message: {
+               Text("Please check your input and try again")
+           }
            
         }
     }
