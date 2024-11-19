@@ -14,7 +14,9 @@ struct NoteListView: View {
     
     @Query var notes: [Note]
     
-    init(sort: SortDescriptor<Note>, searchKeyworkd: String  ) {
+    @Binding var isShowCreateNote: Bool
+    
+    init(sort: SortDescriptor<Note>, searchKeyworkd: String, isShowCreateNote: Binding<Bool>  ) {
         _notes = Query(filter: #Predicate{
             if searchKeyworkd.isEmpty {
                 return true
@@ -24,6 +26,8 @@ struct NoteListView: View {
             }
             
         }, sort: [sort])
+        
+        _isShowCreateNote = isShowCreateNote
     }
     
     
@@ -97,9 +101,24 @@ struct NoteListView: View {
             }
             
         }
+        .overlay {
+            if notes.isEmpty {
+                ContentUnavailableView {
+                    Label("No Notes", systemImage: "note.text")
+                } description: {
+                    Text("All of your notes will displaed here.")
+                } actions: {
+                    Button("Create new note") {
+                        isShowCreateNote.toggle()
+                    }
+                }
+
+            }
+        }
     }
 }
 
 #Preview {
-    NoteListView(sort: SortDescriptor(\Note.title), searchKeyworkd: "")
+    @Previewable @State var isShow = false
+    return NoteListView(sort: SortDescriptor(\Note.title), searchKeyworkd: "", isShowCreateNote: $isShow)
 }
